@@ -2,11 +2,17 @@ import 'dotenv/config'
 import http from 'http'
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
 import { Server as SocketIOServer } from 'socket.io'
 import { OAuth2Client } from 'google-auth-library'
 import jwt from 'jsonwebtoken'
 import { randomUUID, createHash } from 'crypto'
 import mediasoup from 'mediasoup'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
@@ -23,6 +29,21 @@ app.use(
   })
 )
 app.use(express.json())
+
+// Serve static files from client dist in production
+if (process.env.NODE_ENV === 'production') {
+  const clientDistPath = path.join(__dirname, '../../client/dist')
+  app.use(express.static(clientDistPath))
+  
+  // Serve index.html for all non-API routes (SPA routing)
+  app.get('*', (req, res, next) => {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/socket.io')) {
+      res.sendFile(path.join(clientDistPath, 'index.html'))
+    } else {
+      next()
+    }
+  })
+}
 
 const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
