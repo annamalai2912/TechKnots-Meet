@@ -1,0 +1,22 @@
+{
+  "name": "techknots-meet-server",
+  "version": "1.0.0",
+  "description": "Mediasoup signaling server for TechKnots Meet replica",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --env-file=.env ./src/index.js",
+    "start": "node ./src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "google-auth-library": "^9.14.3",
+    "jsonwebtoken": "^9.0.2",
+    "mediasoup": "^3.14.9",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.5"
+  }
+}
+
