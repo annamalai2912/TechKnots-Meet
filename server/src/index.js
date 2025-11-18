@@ -27,13 +27,18 @@ const app = express()
 const corsOptions = {
   origin: (origin, callback) => {
     // In production, allow requests from same origin (when serving static files)
+    // Same-origin requests don't send an origin header
     if (process.env.NODE_ENV === 'production' && !origin) {
       return callback(null, true)
     }
-    // Allow specified CLIENT_ORIGIN
+    // Allow specified CLIENT_ORIGIN (exact match or starts with)
     if (!origin || origin === CLIENT_ORIGIN || origin.startsWith(CLIENT_ORIGIN)) {
       callback(null, true)
+    } else if (process.env.NODE_ENV === 'production' && origin && origin.includes('onrender.com')) {
+      // Allow any Render.com subdomain in production
+      callback(null, true)
     } else {
+      console.warn(`CORS blocked origin: ${origin}, allowed: ${CLIENT_ORIGIN}`)
       callback(new Error('Not allowed by CORS'))
     }
   },
