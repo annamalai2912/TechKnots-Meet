@@ -22,12 +22,25 @@ const LISTEN_IP = process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0'
 const ANNOUNCED_IP = process.env.MEDIASOUP_ANNOUNCED_IP || '127.0.0.1'
 
 const app = express()
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN,
-    credentials: true
-  })
-)
+
+// CORS configuration - in production, allow same origin or specified origin
+const corsOptions = {
+  origin: (origin, callback) => {
+    // In production, allow requests from same origin (when serving static files)
+    if (process.env.NODE_ENV === 'production' && !origin) {
+      return callback(null, true)
+    }
+    // Allow specified CLIENT_ORIGIN
+    if (!origin || origin === CLIENT_ORIGIN || origin.startsWith(CLIENT_ORIGIN)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 // Serve static files from client dist in production
@@ -50,7 +63,17 @@ const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 const server = http.createServer(app)
 const io = new SocketIOServer(server, {
   cors: {
-    origin: CLIENT_ORIGIN,
+    origin: (origin, callback) => {
+      // In production, allow requests from same origin
+      if (process.env.NODE_ENV === 'production' && !origin) {
+        return callback(null, true)
+      }
+      if (!origin || origin === CLIENT_ORIGIN || origin.startsWith(CLIENT_ORIGIN)) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true
   }

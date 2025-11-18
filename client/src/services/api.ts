@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000'
+// In production, use relative URLs since client and server are on same domain
+// In development, use the explicit server URL
+const baseURL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_SERVER_URL || '') 
+  : (import.meta.env.VITE_SERVER_URL || 'http://localhost:4000')
 
 export const api = axios.create({
   baseURL,

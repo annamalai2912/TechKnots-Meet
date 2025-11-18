@@ -14,10 +14,16 @@ export function LandingPage() {
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) return
 
-    const session = await authenticateWithGoogle(credentialResponse.credential)
-    login(session)
-    setAuthToken(session.token)
-    navigate('/dashboard', { replace: true })
+    try {
+      const session = await authenticateWithGoogle(credentialResponse.credential)
+      login(session)
+      setAuthToken(session.token)
+      navigate('/dashboard', { replace: true })
+    } catch (error: any) {
+      console.error('Authentication error:', error)
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to sign in. Please try again.'
+      alert(`Sign in failed: ${errorMessage}`)
+    }
   }
 
   const handleError = () => {
